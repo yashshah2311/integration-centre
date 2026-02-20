@@ -4,6 +4,13 @@ import type { Connection } from "./types";
 import { deleteConnection, getConnections, updateConnection } from "./service";
 import { ConfirmModal } from "../../components/modals/ConfirmModal";
 import { WarningModal } from "../../components/modals/WarningModal";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faMagnifyingGlass,
+  faPencil,
+  faTrash,
+  faArrowUp,
+} from "@fortawesome/free-solid-svg-icons";
 
 export function IntegrationsPage() {
   const [loading, setLoading] = useState(true);
@@ -16,6 +23,14 @@ export function IntegrationsPage() {
 
   const [deleteTarget, setDeleteTarget] = useState<Connection | null>(null);
   const [editTarget, setEditTarget] = useState<Connection | null>(null);
+  const PROVIDER_ICON: Record<string, string> = {
+    quicksight: "/logos/quicksight.png",
+    kafka: "/logos/kafka.png",
+    powerbi: "/logos/powerbi.png",
+    zapier: "/logos/zapier.png",
+    tableau: "/logos/tableau.png",
+    measurabl: "/logos/measurabl.png",
+  };
 
   useEffect(() => {
     let alive = true;
@@ -71,37 +86,140 @@ export function IntegrationsPage() {
     setEditTarget(null);
   }
 
+  function SourcePill({ source }: { source: string }) {
+    const isCarbon = source.toLowerCase() === "carbon";
+    return (
+      <span
+        className={[
+          "inline-flex items-center justify-center px-3 py-1 rounded-md text-xs font-semibold border",
+          isCarbon
+            ? "bg-[#FFF4D6] text-[#C07A00] border-[#FFDFA0]"
+            : "bg-[#E9FBF6] text-[#1B8C74] border-[#B9F0E3]",
+        ].join(" ")}
+      >
+        {source}
+      </span>
+    );
+  }
+
+  function IconSquare({ src, alt }: { src: string; alt: string }) {
+    return (
+      <div className="h-10 w-10 rounded-md bg-white border border-gray-200 flex items-center justify-center overflow-hidden">
+        <img src={src} alt={alt} className="h-full w-full object-cover" />
+      </div>
+    );
+  }
+
+  function Pager({
+    page,
+    totalPages,
+    onPage,
+  }: {
+    page: number;
+    totalPages: number;
+    onPage: (p: number) => void;
+  }) {
+    const maxButtons = 5;
+    const pages: (number | "...")[] = [];
+
+    const start = Math.max(
+      1,
+      Math.min(page - 2, totalPages - (maxButtons - 1)),
+    );
+    const end = Math.min(totalPages, start + (maxButtons - 1));
+
+    for (let p = start; p <= end; p++) pages.push(p);
+    if (end < totalPages - 1) pages.push("...");
+    if (end < totalPages) pages.push(totalPages);
+
+    return (
+      <div className="flex items-center gap-2">
+        {pages.map((p, idx) =>
+          p === "..." ? (
+            <span key={`dots-${idx}`} className="px-2 text-gray-500">
+              …
+            </span>
+          ) : (
+            <button
+              key={p}
+              onClick={() => onPage(p)}
+              className={[
+                "h-10 w-10 rounded-lg border border-gray-200 bg-white text-sm",
+                p === page
+                  ? "bg-gray-100 text-gray-900 font-semibold"
+                  : "text-gray-700 hover:bg-gray-50",
+              ].join(" ")}
+            >
+              {p}
+            </button>
+          ),
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
-      <section>
-        <h1 className="text-xl font-semibold">Integrations</h1>
-        <p className="text-sm text-gray-600 mt-1">
-          Choose a service to connect or manage existing connections.
-        </p>
-      </section>
-
       {/* Tiles */}
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-gray-700">Choose a Service to Connect</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <section className="space-y-2">
+        <h2 className="text-lg font-semibold text-gray-800">
+          Choose a Service to Connect
+        </h2>
+        <p className="text-sm text-gray-500">
+          Connect BraveGen to other tools you use.
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-3">
           {TILES.map((t) => (
-            <button
+            <div
               key={t.provider}
-              className="text-left rounded border bg-white p-4 hover:bg-gray-50"
-              onClick={() => alert(`Mock connect: ${t.title}`)}
+              className="rounded-xl border border-gray-400 bg-gray-200 p-5 shadow-sm"
             >
-              <div className="font-medium">{t.title}</div>
-              <div className="text-sm text-gray-600 mt-1">{t.description}</div>
-            </button>
+              <div className="flex items-start gap-4">
+                {/* Logo */}
+                <div className="h-12 w-12 rounded-lg overflow-hidden flex items-center justify-center bg-gray-200">
+                  <img
+                    src={t.logo}
+                    alt={`${t.title} logo`}
+                    className="h-9 w-9 object-contain"
+                    loading="lazy"
+                  />
+                </div>
+
+                {/* Content */}
+                <div className="min-w-0">
+                  <div className="text-lg font-semibold text-gray-900">
+                    {t.title}
+                  </div>
+                  <div className="text-sm text-gray-600 mt-1 leading-snug">
+                    {t.description}
+                  </div>
+
+                  <button
+                    className="mt-4 inline-flex h-9 items-center rounded-md bg-[#111827] px-4 text-sm font-medium text-white hover:bg-black"
+                    onClick={() => alert(`Mock connect: ${t.title}`)}
+                  >
+                    Add Connection
+                  </button>
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       </section>
-
       {/* Table */}
-      <section className="rounded border bg-white">
-        <div className="p-4 border-b">
-          <div className="font-semibold">Existing Connections</div>
-          <div className="mt-3">
+      <section className="rounded-xl border border-gray-200 bg-white">
+        <div className="p-5">
+          <div className="text-lg font-semibold text-gray-900">
+            Existing Connections
+          </div>
+
+          {/* Search */}
+          <div className="mt-3 relative w-full md:w-[520px]">
+            <FontAwesomeIcon
+              icon={faMagnifyingGlass}
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+            />
             <input
               value={query}
               onChange={(e) => {
@@ -109,66 +227,130 @@ export function IntegrationsPage() {
                 setPage(1);
               }}
               placeholder="Integration or Name"
-              className="w-full md:w-96 h-10 rounded border px-3 text-sm"
+              className="w-full h-11 rounded-lg border border-gray-200 pl-11 pr-4 text-sm outline-none focus:ring-2 focus:ring-gray-200"
             />
           </div>
         </div>
 
-        <div className="p-4">
+        <div className="border-t border-gray-200" />
+        <div className="p-5">
           {loading && <div className="text-sm text-gray-600">Loading…</div>}
           {error && <div className="text-sm text-red-600">{error}</div>}
 
           {!loading && !error && (
             <>
-              <div className="overflow-auto">
-                <table className="min-w-[900px] w-full text-sm">
-                  <thead className="text-left text-gray-600">
-                    <tr className="border-b">
-                      <th className="py-2 pr-3">Integration</th>
-                      <th className="py-2 pr-3">Name</th>
-                      <th className="py-2 pr-3">Source</th>
-                      <th className="py-2 pr-3">Entity/Group</th>
-                      <th className="py-2 pr-3">Interval</th>
-                      <th className="py-2 pr-3">Connector URL</th>
-                      <th className="py-2 pr-3">Instructions</th>
-                      <th className="py-2 pr-3">Actions</th>
+              <div className="overflow-auto rounded-xl border border-gray-200">
+                <table className="min-w-[1100px] w-full text-sm">
+                  <thead className="bg-white">
+                    <tr className="text-gray-600 border-b border-gray-200">
+                      <th className="py-4 px-4 font-semibold">
+                        <div className="inline-flex items-center gap-2">
+                          Integration
+                          <FontAwesomeIcon
+                            icon={faArrowUp}
+                            className="text-gray-400 text-xs"
+                          />
+                        </div>
+                      </th>
+                      <th className="py-4 px-4 font-semibold">Name</th>
+                      <th className="py-4 px-4 font-semibold">Source</th>
+                      <th className="py-4 px-4 font-semibold">Entity/Group</th>
+                      <th className="py-4 px-4 font-semibold">Interval</th>
+                      <th className="py-4 px-4 font-semibold">Connector URL</th>
+                      <th className="py-4 px-4 font-semibold">Instructions</th>
+                      <th className="py-4 px-4 font-semibold text-right"> </th>
                     </tr>
                   </thead>
 
                   <tbody>
                     {rows.map((c) => (
-                      <tr key={c.id} className="border-b last:border-b-0">
-                        <td className="py-2 pr-3">{c.integrationLabel}</td>
-                        <td className="py-2 pr-3">{c.name}</td>
-                        <td className="py-2 pr-3">{c.source}</td>
-                        <td className="py-2 pr-3">{c.entityGroup}</td>
-                        <td className="py-2 pr-3">{c.interval}</td>
-                        <td className="py-2 pr-3">
+                      <tr
+                        key={c.id}
+                        className="border-b border-gray-200 last:border-b-0"
+                      >
+                        {/* Integration (logo + label) */}
+                        <td className="py-4 px-4">
+                          <div className="flex items-center gap-3 min-w-[240px]">
+                            <IconSquare
+                              src={PROVIDER_ICON[c.provider] ?? "/vite.svg"}
+                              alt={c.integrationLabel}
+                            />
+                            <span className="text-gray-900 truncate max-w-[160px]">
+                              {c.integrationLabel}
+                            </span>
+                          </div>
+                        </td>
+
+                        {/* Name */}
+                        <td className="py-4 px-4">
+                          <button className="text-[#2AA9D8] font-semibold hover:underline">
+                            {c.name}
+                          </button>
+                        </td>
+
+                        {/* Source */}
+                        <td className="py-4 px-4">
+                          <SourcePill source={c.source} />
+                        </td>
+
+                        {/* Entity/Group */}
+                        <td className="py-4 px-4 text-gray-700 truncate max-w-[260px]">
+                          {c.entityGroup}
+                        </td>
+
+                        {/* Interval */}
+                        <td className="py-4 px-4 text-gray-700">
+                          {c.interval}
+                        </td>
+
+                        {/* Connector URL */}
+                        <td className="py-4 px-4">
                           <button
-                            className="text-blue-600 hover:underline"
-                            onClick={() => navigator.clipboard.writeText("mock://connector-url")}
+                            className="text-[#2AA9D8] font-semibold hover:underline"
+                            onClick={() =>
+                              navigator.clipboard.writeText(
+                                "mock://url",
+                              )
+                            }
                           >
                             {c.connectorUrlLabel}
                           </button>
                         </td>
-                        <td className="py-2 pr-3">
-                          <button className="text-blue-600 hover:underline" onClick={() => alert("Mock instructions")}>
+
+                        {/* Instructions */}
+                        <td className="py-4 px-4">
+                          <button
+                            className="text-[#2AA9D8] font-semibold hover:underline inline-flex items-center gap-2"
+                            onClick={() => alert("Mock instructions")}
+                          >
                             {c.instructionsLabel}
+                            <span className="text-[#2AA9D8]">↗</span>
                           </button>
                         </td>
-                        <td className="py-2 pr-3">
-                          <div className="flex items-center gap-2">
+
+                        {/* pencil + trash */}
+                        <td className="py-4 px-4">
+                          <div className="flex justify-end gap-3">
                             <button
-                              className="px-2 py-1 rounded border hover:bg-gray-50"
+                              className="h-10 w-10 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 flex items-center justify-center"
                               onClick={() => setEditTarget(c)}
+                              aria-label="Edit"
                             >
-                              Edit
+                              <FontAwesomeIcon
+                                icon={faPencil}
+                                className="text-gray-600"
+                              />
                             </button>
+
                             <button
-                              className="px-2 py-1 rounded border hover:bg-gray-50"
+                              className="h-10 w-10 rounded-lg bg-red-500 hover:bg-red-600 flex items-center justify-center"
                               onClick={() => setDeleteTarget(c)}
+                              aria-label="Delete"
                             >
-                              Delete
+                              <FontAwesomeIcon
+                                icon={faTrash}
+                                className="text-white"
+                              />
                             </button>
                           </div>
                         </td>
@@ -177,7 +359,10 @@ export function IntegrationsPage() {
 
                     {rows.length === 0 && (
                       <tr>
-                        <td colSpan={8} className="py-6 text-center text-gray-600">
+                        <td
+                          colSpan={8}
+                          className="py-10 text-center text-gray-600"
+                        >
                           No results
                         </td>
                       </tr>
@@ -186,26 +371,28 @@ export function IntegrationsPage() {
                 </table>
               </div>
 
-              {/* Pagination */}
-              <div className="flex items-center justify-end gap-2 mt-4">
+              {/* Pagination like screenshot */}
+              <div className="flex items-center justify-center gap-3 mt-6">
                 <button
-                  className="h-9 px-3 rounded border disabled:opacity-50"
+                  className="h-10 px-5 rounded-lg border border-gray-200 bg-white text-gray-700 disabled:opacity-40"
                   disabled={pageSafe <= 1}
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                 >
-                  Previous
+                  ← Previous
                 </button>
 
-                <div className="text-sm text-gray-700">
-                  Page {pageSafe} of {totalPages}
-                </div>
+                <Pager
+                  page={pageSafe}
+                  totalPages={totalPages}
+                  onPage={(p) => setPage(p)}
+                />
 
                 <button
-                  className="h-9 px-3 rounded border disabled:opacity-50"
+                  className="h-10 px-5 rounded-lg border border-gray-200 bg-white text-gray-700 disabled:opacity-40"
                   disabled={pageSafe >= totalPages}
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 >
-                  Next
+                  Next →
                 </button>
               </div>
             </>
@@ -216,7 +403,11 @@ export function IntegrationsPage() {
       {/* Modals */}
       <ConfirmModal
         open={!!deleteTarget}
-        title={deleteTarget ? `Remove "${deleteTarget.name}" Connection?` : "Remove Connection?"}
+        title={
+          deleteTarget
+            ? `Remove "${deleteTarget.name}" Connection?`
+            : "Remove Connection?"
+        }
         body={
           deleteTarget
             ? `Are you sure you want to remove ${deleteTarget.integrationLabel} "${deleteTarget.name}" connection?`
