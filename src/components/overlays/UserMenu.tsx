@@ -16,7 +16,7 @@ export function UserMenu() {
       <button
         ref={btnRef}
         onClick={() => setOpen((v) => !v)}
-        className="h-10 w-10 rounded-full bg-gray-900 text-white text-sm font-semibold"
+        className="h-10 w-10 rounded-lg bg-blue-600 text-white text-sm font-semibold flex items-center justify-center"
         aria-haspopup="menu"
         aria-expanded={open}
         title="User menu"

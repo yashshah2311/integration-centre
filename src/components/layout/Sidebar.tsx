@@ -1,40 +1,68 @@
 import { NavLink } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faHouse,
+  faUsers,
+  faTag,
+  faPlug,
+  faGear,
+  faSitemap,
+  faBuilding,
+  faBoxesStacked,
+  faCloud,
+  faCamera,
+  faDesktop,
+} from "@fortawesome/free-solid-svg-icons";
 
 const nav = [
-  { section: "Organisation", items: [
-    { label: "Manage", to: "/settings/manage" },
-    { label: "Users", to: "/settings/users" },
-    { label: "Tags", to: "/settings/tags" },
-    { label: "Integrations", to: "/settings/integrations" },
-  ]},
-  { section: "Utilities", items: [
-    { label: "Configuration", to: "/settings/configuration" },
-    { label: "Hierarchy", to: "/settings/hierarchy" },
-    { label: "Assets", to: "/settings/assets" },
-  ]},
-  { section: "Carbon", items: [
-    { label: "Configuration", to: "/carbon/configuration" },
-    { label: "Hierarchy", to: "/carbon/hierarchy" },
-    { label: "Inventory Items", to: "/carbon/inventory-items" },
-    { label: "Emission Factors", to: "/carbon/emission-factors" },
-    { label: "Snapshots", to: "/carbon/snapshots" },
-]},
-  { section: "Displays", items: [
-    { label: "Manage", to: "/displays/manage" },    
-  ]},
+  {
+    section: "Organisation",
+    items: [
+      { label: "Manage", to: "/settings/manage", icon: faHouse },
+      { label: "Users", to: "/settings/users", icon: faUsers },
+      { label: "Tags", to: "/settings/tags", icon: faTag },
+      { label: "Integrations", to: "/settings/integrations", icon: faPlug },
+    ],
+  },
+  {
+    section: "Utilities",
+    items: [
+      { label: "Configuration", to: "/settings/configuration", icon: faGear },
+      { label: "Hierarchy", to: "/settings/hierarchy", icon: faSitemap },
+      { label: "Assets", to: "/settings/assets", icon: faBuilding },
+    ],
+  },
+  {
+    section: "Carbon",
+    items: [
+      { label: "Configuration", to: "/carbon/configuration", icon: faGear },
+      { label: "Hierarchy", to: "/carbon/hierarchy", icon: faSitemap },
+      {
+        label: "Inventory Items",
+        to: "/carbon/inventory-items",
+        icon: faBoxesStacked,
+      },
+      {
+        label: "Emission Factors",
+        to: "/carbon/emission-factors",
+        icon: faCloud,
+      },
+      { label: "Snapshots", to: "/carbon/snapshots", icon: faCamera },
+    ],
+  },
+  {
+    section: "Displays",
+    items: [{ label: "Manage", to: "/displays/manage", icon: faDesktop }],
+  },
 ];
 
 export function Sidebar() {
   return (
-    <aside className="w-64 border-r bg-white hidden md:block">
-      <div className="h-16 px-4 flex items-center border-b">
-        <div className="font-semibold">App</div>
-      </div>
-
-      <nav className="p-3 space-y-5">
+    <aside className="w-64 border-r border-gray-200 bg-white hidden md:block">
+      <nav className="p-4 space-y-6">
         {nav.map((group) => (
           <div key={group.section}>
-            <div className="text-xs font-medium text-gray-500 px-2 mb-2">
+            <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide px-2 mb-2">
               {group.section}
             </div>
 
@@ -45,14 +73,26 @@ export function Sidebar() {
                   to={item.to}
                   className={({ isActive }) =>
                     [
-                      "block rounded px-3 py-2 text-sm",
+                      "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors",
                       isActive
-                        ? "bg-green-100 text-green-800 font-medium"
+                        ? "bg-[#6CB100] text-white font-medium"
                         : "text-gray-700 hover:bg-gray-100",
                     ].join(" ")
                   }
                 >
-                  {item.label}
+                  {({ isActive }) => (
+                    <>
+                      <FontAwesomeIcon
+                        icon={item.icon}
+                        className={
+                          isActive
+                            ? "text-white text-base"
+                            : "text-[#6CB100] text-base"
+                        }
+                      />
+                      <span>{item.label}</span>
+                    </>
+                  )}
                 </NavLink>
               ))}
             </div>
