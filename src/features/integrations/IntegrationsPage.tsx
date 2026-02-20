@@ -16,7 +16,7 @@ export function IntegrationsPage() {
   const [loading, setLoading] = useState(true);
   const [connections, setConnections] = useState<Connection[]>([]);
   const [error, setError] = useState<string | null>(null);
-
+  const [sortDir, setSortDir] = useState<"asc" | "desc" | null>(null);
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const pageSize = 5;
@@ -62,13 +62,28 @@ export function IntegrationsPage() {
     );
   }, [connections, query]);
 
+  
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const pageSafe = Math.min(page, totalPages);
+  const sorted = useMemo(() => {
+    if (!sortDir) return filtered;
+    const data = [...filtered];
+    data.sort((a, b) => {
+      const valA = a.integrationLabel.toLowerCase();
+      const valB = b.integrationLabel.toLowerCase();
+
+      if (valA < valB) return sortDir === "asc" ? -1 : 1;
+      if (valA > valB) return sortDir === "asc" ? 1 : -1;
+      return 0;
+    });
+
+    return data;
+  }, [filtered, sortDir]);
 
   const rows = useMemo(() => {
     const start = (pageSafe - 1) * pageSize;
-    return filtered.slice(start, start + pageSize);
-  }, [filtered, pageSafe]);
+    return sorted.slice(start, start + pageSize);
+  }, [sorted, pageSafe]);
 
   async function handleDeleteConfirmed() {
     if (!deleteTarget) return;
@@ -244,13 +259,32 @@ export function IntegrationsPage() {
                   <thead className="bg-white">
                     <tr className="text-gray-600 border-b border-gray-200">
                       <th className="py-4 px-4 font-semibold">
-                        <div className="inline-flex items-center gap-2">
-                          Integration
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setSortDir((prev) =>
+                              prev === null
+                                ? "asc"
+                                : prev === "asc"
+                                  ? "desc"
+                                  : null,
+                            )
+                          }
+                          className="inline-flex items-center gap-2 group"
+                        >
+                          <span>Integration</span>
                           <FontAwesomeIcon
                             icon={faArrowUp}
-                            className="text-gray-400 text-xs"
+                            className={[
+                              "text-xs transition-transform duration-200",
+                              sortDir === "asc" && "rotate-0 text-gray-900",
+                              sortDir === "desc" && "rotate-180 text-gray-900",
+                              sortDir === null && "text-gray-400",
+                            ]
+                              .filter(Boolean)
+                              .join(" ")}
                           />
-                        </div>
+                        </button>
                       </th>
                       <th className="py-4 px-4 font-semibold">Name</th>
                       <th className="py-4 px-4 font-semibold">Source</th>
@@ -308,9 +342,7 @@ export function IntegrationsPage() {
                           <button
                             className="text-[#2AA9D8] font-semibold hover:underline"
                             onClick={() =>
-                              navigator.clipboard.writeText(
-                                "mock://url",
-                              )
+                              navigator.clipboard.writeText("mock://url")
                             }
                           >
                             {c.connectorUrlLabel}
