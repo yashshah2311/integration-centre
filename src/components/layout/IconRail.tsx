@@ -11,11 +11,12 @@ import {
   faWrench,
   faClipboardCheck,
 } from "@fortawesome/free-solid-svg-icons";
+import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 
 type RailItem = {
   key: string;
   label: string;
-  icon: import("@fortawesome/fontawesome-svg-core").IconDefinition;
+  icon: IconDefinition;
 };
 
 const ITEMS: RailItem[] = [
@@ -28,9 +29,58 @@ const ITEMS: RailItem[] = [
   { key: "actions", label: "Actions", icon: faClipboardCheck },
 ];
 
-export function IconRail() {
+export function IconRail({ variant }: { variant: "sidebar" | "bottom" }) {
   const activeKey = "settings";
 
+  if (variant === "bottom") {
+    return (
+      <nav
+        className={[
+          "h-16 w-full",
+          "bg-gradient-to-r from-[#111B2B] to-[#0B1220]",
+          "border-t border-white/10",
+          "flex items-center justify-around",
+          "px-2",
+        ].join(" ")}
+      >
+        {ITEMS.slice(0, 4).map((item) => (
+          <button
+            key={item.key}
+            type="button"
+            className="flex flex-col items-center justify-center gap-1 text-[#C9D2E3] hover:text-white"
+            aria-label={item.label}
+          >
+            <FontAwesomeIcon icon={item.icon} className="text-[20px]" />
+            <div className="text-[11px] leading-none">{item.label}</div>
+          </button>
+        ))}
+
+        <button
+          type="button"
+          className="flex flex-col items-center justify-center gap-1"
+          aria-label="Settings"
+        >
+          <FontAwesomeIcon
+            icon={faGear}
+            className={[
+              "text-[20px]",
+              activeKey === "settings" ? "text-lime-400" : "text-[#C9D2E3]",
+            ].join(" ")}
+          />
+          <div
+            className={[
+              "text-[11px] leading-none",
+              activeKey === "settings" ? "text-lime-400" : "text-[#C9D2E3]",
+            ].join(" ")}
+          >
+            Settings
+          </div>
+        </button>
+      </nav>
+    );
+  }
+
+  // Desktop
   return (
     <aside
       className={[

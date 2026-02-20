@@ -37,28 +37,17 @@ const nav = [
     items: [
       { label: "Configuration", to: "/carbon/configuration", icon: faGear },
       { label: "Hierarchy", to: "/carbon/hierarchy", icon: faSitemap },
-      {
-        label: "Inventory Items",
-        to: "/carbon/inventory-items",
-        icon: faBoxesStacked,
-      },
-      {
-        label: "Emission Factors",
-        to: "/carbon/emission-factors",
-        icon: faCloud,
-      },
+      { label: "Inventory Items", to: "/carbon/inventory-items", icon: faBoxesStacked },
+      { label: "Emission Factors", to: "/carbon/emission-factors", icon: faCloud },
       { label: "Snapshots", to: "/carbon/snapshots", icon: faCamera },
     ],
   },
-  {
-    section: "Displays",
-    items: [{ label: "Manage", to: "/displays/manage", icon: faDesktop }],
-  },
+  { section: "Displays", items: [{ label: "Manage", to: "/displays/manage", icon: faDesktop }] },
 ];
 
-export function Sidebar() {
+export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   return (
-    <aside className="w-64 border-r border-gray-200 bg-white hidden md:block">
+    <aside className="w-64 border-r border-gray-200 bg-white">
       <nav className="p-4 space-y-6">
         {nav.map((group) => (
           <div key={group.section}>
@@ -71,6 +60,7 @@ export function Sidebar() {
                 <NavLink
                   key={item.to}
                   to={item.to}
+                  onClick={onNavigate}
                   className={({ isActive }) =>
                     [
                       "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors",
@@ -84,11 +74,7 @@ export function Sidebar() {
                     <>
                       <FontAwesomeIcon
                         icon={item.icon}
-                        className={
-                          isActive
-                            ? "text-white text-base"
-                            : "text-[#6CB100] text-base"
-                        }
+                        className={isActive ? "text-white text-base" : "text-[#6CB100] text-base"}
                       />
                       <span>{item.label}</span>
                     </>

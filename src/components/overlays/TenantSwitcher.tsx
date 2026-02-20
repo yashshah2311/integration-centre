@@ -33,7 +33,7 @@ export function TenantSwitcher() {
       <button
         ref={btnRef}
         onClick={() => setOpen((v) => !v)}
-        className="h-10 min-w-[240px] px-4 rounded-lg border border-gray-200 bg-white flex items-center justify-between text-sm text-gray-700"
+        className="h-10 w-full sm:min-w-[220px] md:min-w-[240px] px-3 sm:px-4 rounded-lg border border-gray-200 bg-white flex items-center justify-between text-sm text-gray-700"
         aria-haspopup="menu"
         aria-expanded={open}
       >

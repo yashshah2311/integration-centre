@@ -184,7 +184,7 @@ export function IntegrationsPage() {
           Connect BraveGen to other tools you use.
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 pt-3">
           {TILES.map((t) => (
             <div
               key={t.provider}
@@ -254,7 +254,85 @@ export function IntegrationsPage() {
 
           {!loading && !error && (
             <>
-              <div className="overflow-auto rounded-xl border border-gray-200">
+              <div className="md:hidden space-y-3">
+                {rows.map((c) => (
+                  <div
+                    key={c.id}
+                    className="rounded-xl border border-gray-200 bg-white p-4"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-md bg-white border border-gray-200 overflow-hidden">
+                        <img
+                          src={PROVIDER_ICON[c.provider] ?? "/vite.svg"}
+                          alt={c.integrationLabel}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="font-semibold text-gray-900 truncate">
+                          {c.integrationLabel}
+                        </div>
+                        <button className="text-[#2AA9D8] font-semibold hover:underline text-sm">
+                          {c.name}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 flex items-center justify-between">
+                      <SourcePill source={c.source} />
+                      <div className="text-sm text-gray-700">{c.interval}</div>
+                    </div>
+
+                    <div className="mt-2 text-sm text-gray-700 truncate">
+                      {c.entityGroup}
+                    </div>
+
+                    <div className="mt-4 flex items-center justify-between">
+                      <button
+                        className="text-[#2AA9D8] font-semibold hover:underline text-sm"
+                        onClick={() =>
+                          navigator.clipboard.writeText("mock://url")
+                        }
+                      >
+                        {c.connectorUrlLabel}
+                      </button>
+
+                      <div className="flex gap-3">
+                        <button
+                          className="h-10 w-10 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 flex items-center justify-center"
+                          onClick={() => setEditTarget(c)}
+                          aria-label="Edit"
+                        >
+                          <FontAwesomeIcon
+                            icon={faPencil}
+                            className="text-gray-600"
+                          />
+                        </button>
+
+                        <button
+                          className="h-10 w-10 rounded-lg bg-red-500 hover:bg-red-600 flex items-center justify-center"
+                          onClick={() => setDeleteTarget(c)}
+                          aria-label="Delete"
+                        >
+                          <FontAwesomeIcon
+                            icon={faTrash}
+                            className="text-white"
+                          />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {rows.length === 0 && (
+                  <div className="py-10 text-center text-gray-600">
+                    No results
+                  </div>
+                )}
+              </div>
+
+              {/* Desktop table */}
+              <div className="hidden md:block overflow-x-auto rounded-xl border border-gray-200">
                 <table className="min-w-[1100px] w-full text-sm">
                   <thead className="bg-white">
                     <tr className="text-gray-600 border-b border-gray-200">
@@ -403,24 +481,26 @@ export function IntegrationsPage() {
                 </table>
               </div>
 
-              {/* Pagination like screenshot */}
-              <div className="flex items-center justify-center gap-3 mt-6">
+              {/* Pagination */}
+              <div className="flex flex-col md:flex-row items-center justify-center gap-3 mt-6">
                 <button
-                  className="h-10 px-5 rounded-lg border border-gray-200 bg-white text-gray-700 disabled:opacity-40"
+                  className="h-10 px-5 rounded-lg border border-gray-200 bg-white text-gray-700 disabled:opacity-40 w-full md:w-auto"
                   disabled={pageSafe <= 1}
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                 >
                   ← Previous
                 </button>
 
-                <Pager
-                  page={pageSafe}
-                  totalPages={totalPages}
-                  onPage={(p) => setPage(p)}
-                />
+                <div className="text-md text-gray-700 md:hidden">
+                  Page {pageSafe} of {totalPages}
+                </div>
+
+                <div className="hidden md:block">
+                  <Pager page={pageSafe} totalPages={totalPages} onPage={(p) => setPage(p)} />
+                </div>
 
                 <button
-                  className="h-10 px-5 rounded-lg border border-gray-200 bg-white text-gray-700 disabled:opacity-40"
+                  className="h-10 px-5 rounded-lg border border-gray-200 bg-white text-gray-700 disabled:opacity-40 w-full md:w-auto"
                   disabled={pageSafe >= totalPages}
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 >
